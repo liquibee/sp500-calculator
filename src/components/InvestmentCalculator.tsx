@@ -20,9 +20,13 @@ interface Stats {
   finalValue: number;
 }
 
+type ReturnsData = {
+  [key: string]: number;
+}
+
 const InvestmentCalculator: React.FC = () => {
   // Historical S&P 500 returns from the provided data
-  const returns = {
+  const returns: ReturnsData = {
     2024: 22.62, 2023: 26.29, 2022: -18.11, 2021: 28.71, 2020: 18.4, 2019: 31.49,
     2018: -4.38, 2017: 21.83, 2016: 11.96, 2015: 1.38, 2014: 13.69, 2013: 32.39,
     2012: 16.0, 2011: 2.11, 2010: 15.06, 2009: 26.46, 2008: -37.0, 2007: 5.49,
@@ -43,7 +47,7 @@ const InvestmentCalculator: React.FC = () => {
   };
 
   // Get available years from returns data
-  const years = Object.keys(returns).sort((a, b) => b - a); // Sort descending
+  const years = Object.keys(returns).sort((a, b) => Number(b) - Number(a)); // Sort descending
 
   const [startYear, setStartYear] = useState('2000');
   const [initialInvestment, setInitialInvestment] = useState(1000);
@@ -88,7 +92,8 @@ const InvestmentCalculator: React.FC = () => {
       let totalMarketGrowth = 0;
 
       for (let year = startYearNum; year <= 2024; year++) {
-        if (!returns[year]) continue;
+        const returnRate = returns[year.toString()];
+        if (!returnRate) continue;
         yearCount++;
 
         // Add full year of monthly investments for subsequent years
@@ -104,11 +109,11 @@ const InvestmentCalculator: React.FC = () => {
         }
         
         // Apply market return
-        currentValue *= (1 + returns[year] / 100);
-        spIndex *= (1 + returns[year] / 100);
+        currentValue *= (1 + returnRate / 100);
+        spIndex *= (1 + returnRate / 100);
 
         // Calculate year's market growth (excluding contributions)
-        const yearGrowth = returns[year];
+        const yearGrowth = returnRate;
         totalMarketGrowth += yearGrowth;
 
         yearlyData.push({
@@ -116,7 +121,7 @@ const InvestmentCalculator: React.FC = () => {
           investmentYear: yearCount,
           invested: Math.round(yearlyInvestment),
           value: Math.round(currentValue),
-          marketReturn: returns[year].toFixed(2),
+          marketReturn: returnRate.toFixed(2),
           portfolioGrowth: yearGrowth.toFixed(2),
           spIndex: Math.round(spIndex * 100) / 100
         });
@@ -149,6 +154,7 @@ const InvestmentCalculator: React.FC = () => {
     }
   };
 
+  // Rest of the component remains the same...
   return (
     <div className="w-full max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
       <div className="flex items-center gap-2 mb-6">
